@@ -25,8 +25,7 @@ $isAdmin = $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administ
 
 # If so, and the current host is a command line, then change to red color
 # as warning to user that they are operating in an elevated context
-if (($host.Name -match "ConsoleHost") -and ($isAdmin))
-{
+if (($host.Name -match "ConsoleHost") -and ($isAdmin)) {
      $host.UI.RawUI.BackgroundColor = "DarkRed"
      $host.PrivateData.ErrorBackgroundColor = "White"
      $host.PrivateData.ErrorForegroundColor = "DarkRed"
@@ -34,20 +33,26 @@ if (($host.Name -match "ConsoleHost") -and ($isAdmin))
 }
 
 # Useful shortcuts for traversing directories
-function cd...  { cd ..\.. }
-function cd.... { cd ..\..\.. }
+function cd... {
+    cd ..\..
+}
+
+function cd.... {
+    cd ..\..\..
+}
 
 # Compute file hashes - useful for checking successful downloads
-function md5    { Get-FileHash -Algorithm MD5 $args }
-function sha1   { Get-FileHash -Algorithm SHA1 $args }
-function sha256 { Get-FileHash -Algorithm SHA256 $args }
+function md5 {
+    Get-FileHash -Algorithm MD5 $args
+}
 
-# Quick shortcut to start neovim
-function v      { nvim $args }
-Set-Alias vim nvim
+function sha1 {
+    Get-FileHash -Algorithm SHA1 $args
+}
 
-# Quick shortcut to start notepad
-#function n      { notepad $args }
+function sha256 {
+    Get-FileHash -Algorithm SHA256 $args
+}
 
 # Drive shortcuts
 function HKLM:  { Set-Location HKLM: }
@@ -55,18 +60,15 @@ function HKCU:  { Set-Location HKCU: }
 function Env:   { Set-Location Env: }
 
 # Creates drive shortcut for Work Folders, if current user account is using it
-if (Test-Path "$env:USERPROFILE\Work Folders")
-{
+if (Test-Path "$env:USERPROFILE\Work Folders") {
     New-PSDrive -Name Work -PSProvider FileSystem -Root "$env:USERPROFILE\Work Folders" -Description "Work Folders"
     function Work: { Set-Location Work: }
 }
 
 # Creates drive shortcut for OneDrive, if current user account is using it
-#if (Test-Path HKCU:\SOFTWARE\Microsoft\OneDrive)
-#{
+#if (Test-Path HKCU:\SOFTWARE\Microsoft\OneDrive) {
 #    $onedrive = Get-ItemProperty -Path HKCU:\SOFTWARE\Microsoft\OneDrive
-#    if (Test-Path $onedrive.UserFolder)
-#    {
+#    if (Test-Path $onedrive.UserFolder) {
 #        New-PSDrive -Name OneDrive -PSProvider FileSystem -Root $onedrive.UserFolder -Description "OneDrive"
 #        function OneDrive: { Set-Location OneDrive: }
 #    }
@@ -76,33 +78,28 @@ if (Test-Path "$env:USERPROFILE\Work Folders")
 # Set up command prompt and window title. Use UNIX-style convention for identifying
 # whether user is elevated (root) or not. Window title shows current version of PowerShell
 # and appends [ADMIN] if appropriate for easy taskbar identification
-function prompt
-{
-    if ($isAdmin)
-    {
+function prompt {
+    if ($isAdmin) {
         "[" + (Get-Location) + "] # "
     }
-    else
-    {
+
+    else {
         "[" + (Get-Location) + "] $ "
     }
 }
 
 $Host.UI.RawUI.WindowTitle = "PowerShell {0}" -f $PSVersionTable.PSVersion.ToString()
-if ($isAdmin)
-{
+if ($isAdmin) {
     $Host.UI.RawUI.WindowTitle += " [ADMIN]"
 }
 
 # Does the the rough equivalent of dir /s /b. For example, dirs *.png is dir /s /b *.png
-function dirs
-{
-    if ($args.Count -gt 0)
-    {
+function dirs {
+    if ($args.Count -gt 0) {
         Get-ChildItem -Recurse -Include "$args" | Foreach-Object FullName
     }
-    else
-    {
+
+    else {
         Get-ChildItem -Recurse | Foreach-Object FullName
     }
 }
@@ -110,15 +107,13 @@ function dirs
 # Simple function to start a new elevated process. If arguments are supplied then
 # a single command is started with admin rights; if not then a new admin instance
 # of PowerShell is started.
-function admin
-{
-    if ($args.Count -gt 0)
-    {
+function admin {
+    if ($args.Count -gt 0) {
        $argList = "& '" + $args + "'"
        Start-Process "$psHome\powershell.exe" -Verb runAs -ArgumentList $argList
     }
-    else
-    {
+
+    else {
        Start-Process "$psHome\powershell.exe" -Verb runAs
     }
 }
@@ -129,14 +124,12 @@ Set-Alias -Name su -Value admin
 Set-Alias -Name sudo -Value admin
 
 # Make it easy to edit this profile once it's installed
-function Edit-Profile
-{
-    if ($host.Name -match "ise")
-    {
+function Edit-Profile {
+    if ($host.Name -match "ise") {
         $psISE.CurrentPowerShellTab.Files.Add($profile.CurrentUserAllHosts)
     }
-    else
-    {
+
+    else {
         notepad $profile.CurrentUserAllHosts
     }
 }
@@ -156,49 +149,58 @@ Function Test-CommandExists {
 }
 
 ### Other aliases and functions
+
+# Quick shortcut to start notepad
+#function n      { notepad $args }
+
+# Quick shortcut to start neovim
+function v {
+    nvim $args
+}
+
+#Set-Alias vim nvim
+
 if (Test-CommandExists nvim) {
     $EDITOR='nvim'
-#} elseif (Test-CommandExists pvim) {
-    #$EDITOR='pvim'
 #} elseif (Test-CommandExists vim) {
     #$EDITOR='vim'
 #} elseif (Test-CommandExists vi) {
     #$EDITOR='vi'
-#} elseif (Test-CommandExists code) {
-    #$EDITOR='code'
-#} elseif (Test-CommandExists notepad) {
-    #$EDITOR='notepad'
-#} elseif (Test-CommandExists notepad++) {
-    #$EDITOR='notepad++'
-#} elseif (Test-CommandExists sublime_text) {
-    #$EDITOR='sublime_text'
 }
 Set-Alias -Name vim -Value $EDITOR
 
-function ll { Get-ChildItem -Path $pwd -File }
+function ll {
+    Get-ChildItem -Path $pwd -File
+}
+
 function Get-PubIP {
 	(Invoke-WebRequest http://ifconfig.me/ip).Content
 }
+
 function uptime {
 	Get-WmiObject win32_operatingsystem | select csname, @{
 		LABEL='LastBootUpTime';
 		EXPRESSION={$_.ConverttoDateTime($_.lastbootuptime)}
 	}
 }
+
 function reload-profile {
 	& $profile
 }
+
 function find-file($name) {
 	ls -recurse -filter "*${name}*" -ErrorAction SilentyContinue | foreach {
 		$place_path = $_.directory
 		echo "${place_path}\${_}"
 	}
 }
+
 function unzip ($file) {
     Write-Output("Extracting", $file, "to", $pwd)
     $fullFile = Get-ChildItem -Path $pwd -Filter .\cove.zip | ForEach-Object { $_.FullName }
     Expand-Archive -Path $fullFile -DestinationPath $pwd
 }
+
 function grep($regex, $dir) {
     if ( $dir ) {
         Get-ChildItem $dir | select-string $regex
@@ -206,24 +208,31 @@ function grep($regex, $dir) {
     }
     $input | select-string $regex
 }
+
 function touch($file) {
     "" | Out-File $file -Encoding ASCII
 }
+
 function df {
 	Get-Volume
 }
+
 function sed($file, $find, $replace) {
     (Get-Content $file).replace("$find", $replace) | Set-Content $file
 }
+
 function which($name) {
     Get-Command $name | Select-Object -ExpandProperty Definition
 }
+
 function export($name, $value) {
     set-item -force -path "env:$name" -value $value;
 }
+
 function pkill($name) {
     Get-Process $name -ErrorAction SilentlyContinue | Stop-Process
 }
+
 function pgrep($name) {
     Get-Process $name
 }
