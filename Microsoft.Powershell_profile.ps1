@@ -32,25 +32,16 @@ if (($host.Name -match "ConsoleHost") -and ($isAdmin)) {
      Clear-Host
 }
 
-# Useful shortcuts for traversing directories
-function cd... {
-    cd ..\..
-}
-
-function cd.... {
-    cd ..\..\..
-}
-
 # Compute file hashes - useful for checking successful downloads
-function md5 {
+function md5sum {
     Get-FileHash -Algorithm MD5 $args
 }
 
-function sha1 {
+function sha1sum {
     Get-FileHash -Algorithm SHA1 $args
 }
 
-function sha256 {
+function sha256sum {
     Get-FileHash -Algorithm SHA256 $args
 }
 
@@ -206,7 +197,7 @@ function unzip ($file) {
 }
 
 function grep($regex, $dir) {
-    if ( $dir ) {
+    if ($dir) {
         Get-ChildItem $dir | select-string $regex
         return
     }
@@ -257,3 +248,12 @@ if (Test-Path($ChocolateyProfile)) {
 oh-my-posh init pwsh --config https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/cobalt2.omp.json | Invoke-Expression
 
 Import-Module 'C:\tools\poshgit\dahlbyk-posh-git-9bda399\src\posh-git.psd1'
+
+# Useful shortcuts for traversing directories
+#function cd... {
+#    cd ..\..
+#}
+
+#function cd.... {
+#    cd ..\..\..
+#}
