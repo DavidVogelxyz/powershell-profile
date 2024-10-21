@@ -169,6 +169,10 @@ if (Test-CommandExists nvim) {
 }
 Set-Alias -Name vim -Value $EDITOR
 
+function g {
+    git $args
+}
+
 function ll {
     Get-ChildItem -Path $pwd -File
 }
