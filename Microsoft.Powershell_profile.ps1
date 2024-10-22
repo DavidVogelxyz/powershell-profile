@@ -164,23 +164,16 @@ function g {
     git $args
 }
 
-function ll {
-    Get-ChildItem -Path $pwd -File
-}
-
 function Get-PubIP {
 	(Invoke-WebRequest http://ifconfig.me/ip).Content
 }
 
-function uptime {
-	Get-WmiObject win32_operatingsystem | select csname, @{
-		LABEL='LastBootUpTime';
-		EXPRESSION={$_.ConverttoDateTime($_.lastbootuptime)}
-	}
+function df {
+	Get-Volume
 }
 
-function reload-profile {
-	& $profile
+function export($name, $value) {
+    set-item -force -path "env:$name" -value $value;
 }
 
 function find-file($name) {
@@ -188,12 +181,6 @@ function find-file($name) {
 		$place_path = $_.directory
 		echo "${place_path}\${_}"
 	}
-}
-
-function unzip ($file) {
-    Write-Output("Extracting", $file, "to", $pwd)
-    $fullFile = Get-ChildItem -Path $pwd -Filter .\cove.zip | ForEach-Object { $_.FullName }
-    Expand-Archive -Path $fullFile -DestinationPath $pwd
 }
 
 function grep($regex, $dir) {
@@ -204,32 +191,45 @@ function grep($regex, $dir) {
     $input | select-string $regex
 }
 
-function touch($file) {
-    "" | Out-File $file -Encoding ASCII
+function ll {
+    Get-ChildItem -Path $pwd -File
 }
 
-function df {
-	Get-Volume
-}
-
-function sed($file, $find, $replace) {
-    (Get-Content $file).replace("$find", $replace) | Set-Content $file
-}
-
-function which($name) {
-    Get-Command $name | Select-Object -ExpandProperty Definition
-}
-
-function export($name, $value) {
-    set-item -force -path "env:$name" -value $value;
+function pgrep($name) {
+    Get-Process $name
 }
 
 function pkill($name) {
     Get-Process $name -ErrorAction SilentlyContinue | Stop-Process
 }
 
-function pgrep($name) {
-    Get-Process $name
+function reload-profile {
+	& $profile
+}
+
+function sed($file, $find, $replace) {
+    (Get-Content $file).replace("$find", $replace) | Set-Content $file
+}
+
+function touch($file) {
+    "" | Out-File $file -Encoding ASCII
+}
+
+function unzip ($file) {
+    Write-Output("Extracting", $file, "to", $pwd)
+    $fullFile = Get-ChildItem -Path $pwd -Filter .\cove.zip | ForEach-Object { $_.FullName }
+    Expand-Archive -Path $fullFile -DestinationPath $pwd
+}
+
+function uptime {
+	Get-WmiObject win32_operatingsystem | select csname, @{
+		LABEL='LastBootUpTime';
+		EXPRESSION={$_.ConverttoDateTime($_.lastbootuptime)}
+	}
+}
+
+function which($name) {
+    Get-Command $name | Select-Object -ExpandProperty Definition
 }
 
 # Import the Chocolatey Profile that contains the necessary code to enable
