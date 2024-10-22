@@ -195,6 +195,10 @@ function ll {
     Get-ChildItem -Path $pwd -File
 }
 
+function lsof {
+    Get-Process | Select-Object -Property Name, Id, Handles | Sort-Object -Property Handles -Descending
+}
+
 function pgrep($name) {
     Get-Process $name
 }
