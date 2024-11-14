@@ -211,6 +211,10 @@ function reload-profile {
 	& $profile
 }
 
+function restart-wsl {
+    Get-Service vmcompute | Restart-Service
+}
+
 function sed($file, $find, $replace) {
     (Get-Content $file).replace("$find", $replace) | Set-Content $file
 }
