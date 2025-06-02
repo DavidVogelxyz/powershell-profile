@@ -165,11 +165,11 @@ function g {
 }
 
 function Get-PubIP {
-	(Invoke-WebRequest http://ifconfig.me/ip).Content
+    (Invoke-WebRequest http://ifconfig.me/ip).Content
 }
 
 function df {
-	Get-Volume
+    Get-Volume
 }
 
 function export($name, $value) {
@@ -177,10 +177,10 @@ function export($name, $value) {
 }
 
 function find-file($name) {
-	ls -recurse -filter "*${name}*" -ErrorAction SilentyContinue | foreach {
-		$place_path = $_.directory
-		echo "${place_path}\${_}"
-	}
+    ls -recurse -filter "*${name}*" -ErrorAction SilentyContinue | foreach {
+        $place_path = $_.directory
+        echo "${place_path}\${_}"
+    }
 }
 
 function grep($regex, $dir) {
@@ -208,7 +208,7 @@ function pkill($name) {
 }
 
 function reload-profile {
-	& $profile
+    & $profile
 }
 
 function restart-wsl {
@@ -230,10 +230,10 @@ function unzip ($file) {
 }
 
 function uptime {
-	Get-WmiObject win32_operatingsystem | select csname, @{
-		LABEL='LastBootUpTime';
-		EXPRESSION={$_.ConverttoDateTime($_.lastbootuptime)}
-	}
+    Get-WmiObject win32_operatingsystem | select csname, @{
+        LABEL='LastBootUpTime';
+        EXPRESSION={$_.ConverttoDateTime($_.lastbootuptime)}
+    }
 }
 
 function which($name) {
