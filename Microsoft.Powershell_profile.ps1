@@ -178,3 +178,6 @@ oh-my-posh --init --shell pwsh --config "$env:POSH_THEMES_PATH/sonicboom_dark.om
 
 # Import "posh-git"
 Import-Module 'C:\tools\poshgit\dahlbyk-posh-git-9bda399\src\posh-git.psd1'
+
+# A `clear` at this point will only leave the "milliseconds to load" on-screen
+clear
