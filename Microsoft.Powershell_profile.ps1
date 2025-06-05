@@ -173,7 +173,7 @@ $ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
 if (Test-Path($ChocolateyProfile))      { Import-Module "$ChocolateyProfile" }
 
 # Initialize "oh my posh"
-oh-my-posh --init --shell pwsh --config "$env:POSH_THEMES_PATH/cobalt2.omp.json" | Invoke-Expression
+oh-my-posh --init --shell pwsh --config "$env:POSH_THEMES_PATH/sonicboom_dark.omp.json" | Invoke-Expression
 
 # Import "posh-git"
 Import-Module 'C:\tools\poshgit\dahlbyk-posh-git-9bda399\src\posh-git.psd1'
