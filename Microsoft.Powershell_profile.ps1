@@ -154,6 +154,7 @@ function uptime {
 
 Set-Alias -Name df -Value Get-Volume
 Set-Alias -Name g -Value git
+Set-Alias -Name mkd -Value mkdir
 
 # Set UNIX-like aliases for the admin command, so sudo <command> will run the command
 # with elevated rights.
