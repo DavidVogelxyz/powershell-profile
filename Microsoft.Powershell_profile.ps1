@@ -172,7 +172,8 @@ Set-Alias -Name sudo -Value admin
 $ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
 if (Test-Path($ChocolateyProfile))      { Import-Module "$ChocolateyProfile" }
 
-## Final Line to set prompt
-oh-my-posh init pwsh --config "$env:USERPROFILE/Documents/WindowsPowershell/cobalt2.omp.json" | Invoke-Expression
+# Initialize "oh my posh"
+oh-my-posh --init --shell pwsh --config "$env:POSH_THEMES_PATH/cobalt2.omp.json" | Invoke-Expression
 
+# Import "posh-git"
 Import-Module 'C:\tools\poshgit\dahlbyk-posh-git-9bda399\src\posh-git.psd1'
