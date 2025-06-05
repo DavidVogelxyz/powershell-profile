@@ -32,98 +32,17 @@ if (($host.Name -match "ConsoleHost") -and ($isAdmin)) {
      Clear-Host
 }
 
-# Compute file hashes - useful for checking successful downloads
-function md5sum {
-    Get-FileHash -Algorithm MD5 $args
-}
-
-function sha1sum {
-    Get-FileHash -Algorithm SHA1 $args
-}
-
-function sha256sum {
-    Get-FileHash -Algorithm SHA256 $args
-}
-
-# Drive shortcuts
-function HKLM:  { Set-Location HKLM: }
-function HKCU:  { Set-Location HKCU: }
-function Env:   { Set-Location Env: }
-
-# Creates drive shortcut for Work Folders, if current user account is using it
-if (Test-Path "$env:USERPROFILE\Work Folders") {
-    New-PSDrive -Name Work -PSProvider FileSystem -Root "$env:USERPROFILE\Work Folders" -Description "Work Folders"
-    function Work: { Set-Location Work: }
-}
-
-# Creates drive shortcut for OneDrive, if current user account is using it
-#if (Test-Path HKCU:\SOFTWARE\Microsoft\OneDrive) {
-#    $onedrive = Get-ItemProperty -Path HKCU:\SOFTWARE\Microsoft\OneDrive
-#    if (Test-Path $onedrive.UserFolder) {
-#        New-PSDrive -Name OneDrive -PSProvider FileSystem -Root $onedrive.UserFolder -Description "OneDrive"
-#        function OneDrive: { Set-Location OneDrive: }
-#    }
-#    Remove-Variable onedrive
-#}
-
 # Set up command prompt and window title. Use UNIX-style convention for identifying
 # whether user is elevated (root) or not. Window title shows current version of PowerShell
 # and appends [ADMIN] if appropriate for easy taskbar identification
 function prompt {
-    if ($isAdmin) {
-        "[" + (Get-Location) + "] # "
-    }
-
-    else {
-        "[" + (Get-Location) + "] $ "
-    }
+    if ($isAdmin)   { "[" + (Get-Location) + "] # " }
+    else            { "[" + (Get-Location) + "] $ " }
 }
+
+if ($isAdmin)       { $Host.UI.RawUI.WindowTitle += " [ADMIN]" }
 
 $Host.UI.RawUI.WindowTitle = "PowerShell {0}" -f $PSVersionTable.PSVersion.ToString()
-if ($isAdmin) {
-    $Host.UI.RawUI.WindowTitle += " [ADMIN]"
-}
-
-# Does the the rough equivalent of dir /s /b. For example, dirs *.png is dir /s /b *.png
-function dirs {
-    if ($args.Count -gt 0) {
-        Get-ChildItem -Recurse -Include "$args" | Foreach-Object FullName
-    }
-
-    else {
-        Get-ChildItem -Recurse | Foreach-Object FullName
-    }
-}
-
-# Simple function to start a new elevated process. If arguments are supplied then
-# a single command is started with admin rights; if not then a new admin instance
-# of PowerShell is started.
-function admin {
-    if ($args.Count -gt 0) {
-       $argList = "& '" + $args + "'"
-       Start-Process "$psHome\powershell.exe" -Verb runAs -ArgumentList $argList
-    }
-
-    else {
-       Start-Process "$psHome\powershell.exe" -Verb runAs
-    }
-}
-
-# Set UNIX-like aliases for the admin command, so sudo <command> will run the command
-# with elevated rights.
-Set-Alias -Name su -Value admin
-Set-Alias -Name sudo -Value admin
-
-# Make it easy to edit this profile once it's installed
-function Edit-Profile {
-    if ($host.Name -match "ise") {
-        $psISE.CurrentPowerShellTab.Files.Add($profile.CurrentUserAllHosts)
-    }
-
-    else {
-        notepad $profile.CurrentUserAllHosts
-    }
-}
 
 # We don't need these any more; they were just temporary variables to get to $isAdmin.
 # Delete them to prevent cluttering up the user profile.
@@ -139,41 +58,65 @@ Function Test-CommandExists {
     Finally { $ErrorActionPreference = $oldPreference }
 }
 
-### Other aliases and functions
+#####################################################################
+# ALIASES FOR TEXT EDITOR
+#####################################################################
 
-# Quick shortcut to start notepad
-#function n      { notepad $args }
+# Set `$EDITOR`
+if (Test-CommandExists nvim)            { $EDITOR='nvim' }
+else                                    { $EDITOR='notepad'}
 
-# Quick shortcut to start neovim
-function v {
-    nvim $args
-}
-
-#Set-Alias vim nvim
-
-if (Test-CommandExists nvim) {
-    $EDITOR='nvim'
-#} elseif (Test-CommandExists vim) {
-    #$EDITOR='vim'
-#} elseif (Test-CommandExists vi) {
-    #$EDITOR='vi'
-}
+# Set aliases for `$EDITOR`
+Set-Alias -Name v -Value $EDITOR
 Set-Alias -Name vim -Value $EDITOR
 
-function g {
-    git $args
+#####################################################################
+# OTHER FUNCTIONS
+#####################################################################
+
+# Functions that fit on one line
+function Edit-Profile                   { v $profile }
+function Env:                           { Set-Location Env: }
+function Get-PubIP                      { (Invoke-WebRequest http://ifconfig.me/ip).Content }
+function HKCU:                          { Set-Location HKCU: }
+function HKLM:                          { Set-Location HKLM: }
+function export($name, $value)          { set-item -force -path "env:$name" -value $value; }
+function ll                             { Get-ChildItem -Path $pwd -File }
+function lsof                           { Get-Process | Select-Object -Property Name, Id, Handles | Sort-Object -Property Handles -Descending }
+function md5sum                         { Get-FileHash -Algorithm MD5 $args }
+function pgrep($name)                   { Get-Process $name }
+function pkill($name)                   { Get-Process $name -ErrorAction SilentlyContinue | Stop-Process }
+function reload-profile                 { & $profile }
+function restart-wsl                    { Get-Service vmcompute | Restart-Service }
+function sed($file, $find, $replace)    { (Get-Content $file).replace("$find", $replace) | Set-Content $file }
+function sha1sum                        { Get-FileHash -Algorithm SHA1 $args }
+function sha256sum                      { Get-FileHash -Algorithm SHA256 $args }
+function touch($file)                   { "" | Out-File $file -Encoding ASCII }
+function which($name)                   { Get-Command $name | Select-Object -ExpandProperty Definition }
+
+# Simple function to start a new elevated process. If arguments are supplied then
+# a single command is started with admin rights; if not then a new admin instance
+# of PowerShell is started.
+function admin {
+    if ($args.Count -gt 0) {
+       $argList = "& '" + $args + "'"
+       Start-Process "$psHome\powershell.exe" -Verb runAs -ArgumentList $argList
+    }
+
+    else {
+       Start-Process "$psHome\powershell.exe" -Verb runAs
+    }
 }
 
-function Get-PubIP {
-    (Invoke-WebRequest http://ifconfig.me/ip).Content
-}
+# Does the the rough equivalent of dir /s /b. For example, dirs *.png is dir /s /b *.png
+function dirs {
+    if ($args.Count -gt 0) {
+        Get-ChildItem -Recurse -Include "$args" | Foreach-Object FullName
+    }
 
-function df {
-    Get-Volume
-}
-
-function export($name, $value) {
-    set-item -force -path "env:$name" -value $value;
+    else {
+        Get-ChildItem -Recurse | Foreach-Object FullName
+    }
 }
 
 function find-file($name) {
@@ -188,39 +131,8 @@ function grep($regex, $dir) {
         Get-ChildItem $dir | select-string $regex
         return
     }
+
     $input | select-string $regex
-}
-
-function ll {
-    Get-ChildItem -Path $pwd -File
-}
-
-function lsof {
-    Get-Process | Select-Object -Property Name, Id, Handles | Sort-Object -Property Handles -Descending
-}
-
-function pgrep($name) {
-    Get-Process $name
-}
-
-function pkill($name) {
-    Get-Process $name -ErrorAction SilentlyContinue | Stop-Process
-}
-
-function reload-profile {
-    & $profile
-}
-
-function restart-wsl {
-    Get-Service vmcompute | Restart-Service
-}
-
-function sed($file, $find, $replace) {
-    (Get-Content $file).replace("$find", $replace) | Set-Content $file
-}
-
-function touch($file) {
-    "" | Out-File $file -Encoding ASCII
 }
 
 function unzip ($file) {
@@ -236,9 +148,21 @@ function uptime {
     }
 }
 
-function which($name) {
-    Get-Command $name | Select-Object -ExpandProperty Definition
-}
+#####################################################################
+# OTHER ALIASES
+#####################################################################
+
+Set-Alias -Name df -Value Get-Volume
+Set-Alias -Name g -Value git
+
+# Set UNIX-like aliases for the admin command, so sudo <command> will run the command
+# with elevated rights.
+Set-Alias -Name su -Value admin
+Set-Alias -Name sudo -Value admin
+
+#####################################################################
+# FINAL CONFIGS
+#####################################################################
 
 # Import the Chocolatey Profile that contains the necessary code to enable
 # tab-completions to function for `choco`.
@@ -246,22 +170,9 @@ function which($name) {
 # for `choco` will not function.
 # See https://ch0.co/tab-completion for details.
 $ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
-if (Test-Path($ChocolateyProfile)) {
-    Import-Module "$ChocolateyProfile"
-}
-
-#Invoke-Expression (& { (zoxide init powershell | Out-String) })
+if (Test-Path($ChocolateyProfile))      { Import-Module "$ChocolateyProfile" }
 
 ## Final Line to set prompt
-oh-my-posh init pwsh --config https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/cobalt2.omp.json | Invoke-Expression
+oh-my-posh init pwsh --config "$env:USERPROFILE/Documents/WindowsPowershell/cobalt2.omp.json" | Invoke-Expression
 
 Import-Module 'C:\tools\poshgit\dahlbyk-posh-git-9bda399\src\posh-git.psd1'
-
-# Useful shortcuts for traversing directories
-#function cd... {
-#    cd ..\..
-#}
-
-#function cd.... {
-#    cd ..\..\..
-#}
