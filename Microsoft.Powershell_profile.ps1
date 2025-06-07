@@ -15,6 +15,8 @@
 ### This is the default policy on Windows Server 2012 R2 and above for server Windows. For
 ### more information about execution policies, run Get-Help about_Execution_Policies.
 
+echo "Configuring basic settings and aliases."
+
 # Import Terminal Icons
 #Import-Module -Name Terminal-Icons
 
@@ -165,6 +167,8 @@ Set-Alias -Name sudo -Value admin
 # FINAL CONFIGS
 #####################################################################
 
+echo "Configuring profile for Chocolatey."
+
 # Import the Chocolatey Profile that contains the necessary code to enable
 # tab-completions to function for `choco`.
 # Be aware that if you are missing these lines from your profile, tab completion
@@ -173,8 +177,12 @@ Set-Alias -Name sudo -Value admin
 $ChocolateyProfile = "$env:ChocolateyInstall\helpers\chocolateyProfile.psm1"
 if (Test-Path($ChocolateyProfile))      { Import-Module "$ChocolateyProfile" }
 
+echo "Initializing Oh My Posh."
+
 # Initialize "oh my posh"
 oh-my-posh --init --shell pwsh --config "$env:POSH_THEMES_PATH/sonicboom_dark.omp.json" | Invoke-Expression
+
+echo "Initializing posh-git."
 
 # Import "posh-git"
 Import-Module 'C:\tools\poshgit\dahlbyk-posh-git-9bda399\src\posh-git.psd1'
